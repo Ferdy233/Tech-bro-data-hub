@@ -22,25 +22,25 @@ export default function Home() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-center">
           {/* Left Content */}
           <div className="lg:col-span-2">
-            <div className="inline-flex items-center px-4 py-2 rounded-lg bg-slate-800/50 backdrop-blur-sm text-slate-300 text-sm font-medium mb-8 border border-slate-700">
+            <div className="inline-flex items-center px-4 py-2 rounded-full bg-slate-800/60 backdrop-blur-sm text-amber-300/90 text-xs font-semibold tracking-wider mb-8 border border-slate-700/80">
               TechBro Data Hub
             </div>
 
-            <h1 className="text-6xl md:text-7xl font-bold text-white mb-4 leading-tight">
+            <h1 className="text-5xl md:text-7xl font-bold text-white mb-3 leading-tight tracking-tight">
               TechBro Data Hub
             </h1>
 
-            <p className="text-4xl md:text-5xl font-bold text-amber-400 mb-8">
+            <p className="text-3xl md:text-5xl font-bold text-amber-400 mb-8">
               bundles
             </p>
 
             <p className="text-lg text-slate-300 mb-12 max-w-2xl leading-relaxed">
-              Kindly be informed that Yello deliveries are running 24/7 all through the night with no breaks 🚀 📱 Keep shopping till you&apos;re tired.... Instant delivery 🍌 🍌
+              Kindly be informed that Yello deliveries are running 24/7 all through the night with no breaks. Keep shopping till you&apos;re tired.... Instant delivery
             </p>
 
             <Link
               href="/buy-data"
-              className="inline-flex items-center px-8 py-4 rounded-full bg-amber-400 text-slate-900 font-bold text-lg hover:bg-amber-300 transition-all duration-300 shadow-lg hover:shadow-xl"
+              className="inline-flex items-center px-14 py-4 rounded-full bg-amber-400 text-slate-900 font-bold text-lg hover:bg-amber-300 hover:-translate-y-0.5 transition-all duration-200 shadow-lg shadow-amber-400/20 hover:shadow-xl hover:shadow-amber-400/30"
             >
               BUY DATA
               <ArrowRight className="ml-2 h-5 w-5" />
@@ -49,7 +49,7 @@ export default function Home() {
 
           {/* Right Announcements Panel */}
           <div className="lg:col-span-1">
-            <div className="bg-slate-800/60 backdrop-blur-md rounded-2xl p-8 border border-slate-700">
+            <div className="bg-slate-800/60 backdrop-blur-md rounded-2xl p-8 border border-slate-700/80 shadow-2xl shadow-black/20">
               <div className="mb-6">
                 <h3 className="text-amber-400 font-bold text-sm tracking-widest mb-2">
                   ANNOUNCEMENTS
@@ -59,12 +59,12 @@ export default function Home() {
                 </h4>
               </div>
 
-              <div className="flex items-center justify-between mb-6">
-                <span className="text-slate-400 text-sm">0 UPDATES</span>
+              <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-700/60">
+                <span className="text-slate-500 text-xs font-medium tracking-wider">0 UPDATES</span>
               </div>
 
-              <div className="bg-slate-900/50 rounded-lg p-4 border border-slate-600">
-                <p className="text-slate-300 text-sm">
+              <div className="bg-slate-900/50 rounded-lg p-4 border border-slate-700/60">
+                <p className="text-slate-400 text-sm leading-relaxed">
                   No notices right now. Check back later.
                 </p>
               </div>

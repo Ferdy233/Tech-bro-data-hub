@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
@@ -22,9 +23,13 @@ export default function Navigation() {
         <div className="flex justify-between items-center h-20">
           {/* Brand */}
           <Link href="/" className="flex items-center group">
-            <div className="h-10 w-10 rounded-full border-2 border-amber-400 flex items-center justify-center bg-slate-900">
-              <span className="text-amber-400 font-bold text-sm">TB</span>
-            </div>
+            <Image
+              src="/TechBro Logo.png"
+              alt="TechBro Data Hub"
+              width={40}
+              height={40}
+              className="h-10 w-10 rounded-full object-cover ring-2 ring-amber-400"
+            />
             <div className="ml-3">
               <div className="font-bold text-base leading-tight">
                 <span className="text-white">TechBro</span>

@@ -17,6 +17,10 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "TechBro Data Hub - Fast, reliable data bundles",
   description: "Fast, reliable data bundles across major networks.",
+  icons: {
+    icon: "/TechBro Logo.png",
+    apple: "/TechBro Logo.png",
+  },
 };
 
 export default function RootLayout({
