@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Tech Bro Hub - Imports, Data & Exchange",
-  description: "Your one-stop platform for imports management, data bundles, naira to cedis exchange, and ad management",
+  title: "TechBro Data Hub - Fast, reliable data bundles",
+  description: "Fast, reliable data bundles across major networks.",
 };
 
 export default function RootLayout({
@@ -27,13 +27,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-slate-900 text-slate-100`}
       >
         <ToastProvider>
           <Navigation />
-          <main className="min-h-screen bg-gray-50 pt-20">
-            {children}
-          </main>
+          <main className="min-h-screen pt-20">{children}</main>
         </ToastProvider>
       </body>
     </html>
