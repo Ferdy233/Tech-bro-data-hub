@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Search, Loader2, Package, AlertCircle } from 'lucide-react'
 
@@ -11,6 +11,18 @@ interface OrderStatus {
 }
 
 export default function TrackOrdersPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+        <Loader2 className="h-8 w-8 text-amber-400 animate-spin" />
+      </div>
+    }>
+      <TrackOrdersContent />
+    </Suspense>
+  )
+}
+
+function TrackOrdersContent() {
   const searchParams = useSearchParams()
   const [reference, setReference] = useState('')
   const [orderStatus, setOrderStatus] = useState<OrderStatus | null>(null)
