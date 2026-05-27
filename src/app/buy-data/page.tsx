@@ -331,7 +331,7 @@ export default function BuyDataPage() {
       {showPurchaseModal && selectedPlan && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={closeModal} />
-          <div className="relative bg-slate-800 rounded-2xl p-6 md:p-8 w-full max-w-md border border-slate-700 shadow-2xl">
+          <div className="relative bg-slate-800 rounded-2xl p-5 md:p-6 w-full max-w-md border border-slate-700 shadow-2xl">
             <div className="flex items-start justify-between mb-1">
               <div>
                 <h2 className="text-xs font-bold text-slate-300 tracking-widest">
@@ -349,9 +349,9 @@ export default function BuyDataPage() {
               </button>
             </div>
 
-            <div className="border-t border-slate-700 my-5" />
+            <div className="border-t border-slate-700 my-4" />
 
-            <div className="flex items-start gap-3 mb-6">
+            <div className="flex items-start gap-3 mb-4">
               <div className={`h-10 w-10 rounded-full ${styles.badge} border-2 flex items-center justify-center flex-shrink-0`}>
                 <span className="text-xs font-bold">{selectedPlan.label}</span>
               </div>
@@ -360,7 +360,7 @@ export default function BuyDataPage() {
               </p>
             </div>
 
-            <div className="mb-6">
+            <div className="mb-4">
               <label htmlFor="phone" className="block text-xs font-bold text-slate-300 mb-2 tracking-widest">
                 RECIPIENT NUMBER
               </label>
@@ -374,14 +374,14 @@ export default function BuyDataPage() {
                   setPurchaseStatus('idle')
                 }}
                 placeholder="e.g. 024 123 4567"
-                className="w-full px-4 py-3 bg-slate-900/50 border-2 border-amber-400 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:border-amber-500 transition-colors"
+                className="w-full px-4 py-2.5 bg-slate-900/50 border-2 border-amber-400 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:border-amber-500 transition-colors"
               />
             </div>
 
             <button
               onClick={handlePurchase}
               disabled={isLoading || !phoneNumber}
-              className="w-full bg-amber-400 text-slate-900 py-3.5 rounded-lg font-bold text-sm tracking-wider hover:bg-amber-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all duration-200"
+              className="w-full bg-amber-400 text-slate-900 py-3 rounded-lg font-bold text-sm tracking-wider hover:bg-amber-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all duration-200"
             >
               {isLoading ? (
                 <>
