@@ -29,7 +29,7 @@ export default function Navigation() {
               height={32}
               className="h-8 w-8 rounded-full object-cover"
             />
-            <span className="text-white font-bold text-sm hidden sm:block">TechBro</span>
+            <span className="text-white font-bold text-sm">TechBro</span>
           </Link>
 
           {/* Desktop nav */}
