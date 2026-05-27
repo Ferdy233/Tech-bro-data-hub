@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { Search, Loader2, Package, AlertCircle } from 'lucide-react'
+import { Search, Loader2, Package, AlertCircle, ArrowRight } from 'lucide-react'
 
 interface OrderStatus {
   status: string
@@ -13,7 +13,7 @@ interface OrderStatus {
 export default function TrackOrdersPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
         <Loader2 className="h-8 w-8 text-amber-400 animate-spin" />
       </div>
     }>
@@ -85,135 +85,124 @@ function TrackOrdersContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-8">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-slate-900 py-12 md:py-16">
+      <div className="max-w-xl mx-auto px-4 sm:px-6">
+
         {/* Header */}
-        <div className="mb-8">
-          <p className="text-amber-400 font-bold text-sm tracking-widest mb-2">
-            TRACK YOUR ORDER
-          </p>
-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
-            Check Order Status
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/80 border border-slate-700/60 mb-4">
+            <Search className="h-3 w-3 text-amber-400" />
+            <span className="text-slate-300 text-xs font-medium">Order Tracking</span>
+          </div>
+          <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">
+            Track Your Order
           </h1>
           <p className="text-slate-400 text-sm">
-            Enter your order reference number to check your transaction status.
+            Enter your order reference to check delivery status.
           </p>
         </div>
 
-        {/* Search Form */}
-        <div className="mb-6">
-          <div className="mb-5">
-            <label className="block text-xs font-bold text-slate-300 mb-2 tracking-widest">
-              ORDER REFERENCE
-            </label>
-            <div className="relative max-w-md">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
-              <input
-                type="text"
-                value={reference}
-                onChange={(e) => {
-                  setReference(e.target.value)
-                  setErrorMessage('')
-                }}
-                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                placeholder="e.g. 17323233259547876"
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-800/60 border border-slate-700 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:border-amber-400 transition-colors duration-300"
-              />
-            </div>
+        {/* Search Card */}
+        <div className="bg-slate-800/50 rounded-2xl border border-slate-700/60 p-6 mb-6">
+          <label className="block text-xs font-bold text-slate-400 mb-2 tracking-wider">
+            ORDER REFERENCE
+          </label>
+          <div className="flex gap-3">
+            <input
+              type="text"
+              value={reference}
+              onChange={(e) => {
+                setReference(e.target.value)
+                setErrorMessage('')
+              }}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              placeholder="e.g. 17323233259547876"
+              className="flex-1 px-4 py-3 bg-slate-900/60 border border-slate-700 rounded-xl text-white text-sm placeholder-slate-500 focus:outline-none focus:border-amber-400 transition-colors"
+            />
+            <button
+              onClick={() => handleSearch()}
+              disabled={isLoading}
+              className="px-5 py-3 rounded-xl bg-amber-400 text-slate-900 font-bold text-sm hover:bg-amber-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center gap-2"
+            >
+              {isLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <ArrowRight className="h-4 w-4" />
+              )}
+            </button>
           </div>
 
           {/* Error Message */}
           {errorMessage && (
-            <div className="mb-3 p-2.5 bg-red-500/10 border border-red-500/30 rounded-lg flex items-center gap-2 max-w-md">
+            <div className="mt-3 p-3 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-2">
               <AlertCircle className="h-4 w-4 text-red-400 flex-shrink-0" />
               <p className="text-red-300 text-sm">{errorMessage}</p>
             </div>
           )}
-
-          {/* Search Button */}
-          <button
-            onClick={() => handleSearch()}
-            disabled={isLoading}
-            className="inline-flex items-center px-7 py-2.5 rounded-full bg-amber-400 text-slate-900 font-bold text-xs tracking-widest hover:bg-amber-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg hover:shadow-xl"
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                CHECKING...
-              </>
-            ) : (
-              'CHECK STATUS'
-            )}
-          </button>
         </div>
 
-        {/* Result Section */}
-        <div className="bg-slate-800/40 backdrop-blur-lg rounded-xl border border-slate-700 overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-3 border-b border-slate-700">
-            <h2 className="text-white font-bold text-sm">Order Status</h2>
-            <button
-              onClick={() => handleSearch()}
-              disabled={isLoading || !reference.trim()}
-              className="px-4 py-1.5 rounded-md bg-slate-700 text-slate-300 text-xs font-semibold tracking-wider hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              SEARCH
-            </button>
+        {/* Result */}
+        {!hasSearched && (
+          <div className="text-center py-12">
+            <div className="h-16 w-16 rounded-full bg-slate-800/60 border border-slate-700/60 flex items-center justify-center mx-auto mb-4">
+              <Package className="h-7 w-7 text-slate-600" />
+            </div>
+            <p className="text-slate-500 text-sm">
+              Your order status will appear here.
+            </p>
           </div>
+        )}
 
-          <div className="px-5 py-4">
-            {!hasSearched && (
-              <p className="text-slate-500 text-sm">
-                Enter an order reference above, then tap{' '}
-                <span className="text-slate-300 font-medium">Check status</span>.
-              </p>
-            )}
+        {hasSearched && !orderStatus && !errorMessage && (
+          <div className="text-center py-12">
+            <div className="h-16 w-16 rounded-full bg-slate-800/60 border border-slate-700/60 flex items-center justify-center mx-auto mb-4">
+              <Package className="h-7 w-7 text-slate-600" />
+            </div>
+            <p className="text-slate-400 text-sm">No order found for this reference.</p>
+          </div>
+        )}
 
-            {hasSearched && !orderStatus && !errorMessage && (
-              <div className="text-center py-8">
-                <Package className="h-12 w-12 text-slate-600 mx-auto mb-3" />
-                <p className="text-slate-400 text-sm">No order found for this reference.</p>
+        {orderStatus && (
+          <div className="bg-slate-800/50 rounded-2xl border border-slate-700/60 overflow-hidden">
+            {/* Status Header */}
+            <div className="px-6 py-4 border-b border-slate-700/60 flex items-center justify-between">
+              <div>
+                <p className="text-slate-500 text-xs mb-0.5">Reference</p>
+                <p className="text-white font-mono text-sm font-medium">{reference}</p>
               </div>
-            )}
+              <span
+                className={`px-3 py-1.5 rounded-full text-xs font-bold border ${getStatusColor(orderStatus.status)}`}
+              >
+                {orderStatus.status || 'Unknown'}
+              </span>
+            </div>
 
-            {orderStatus && (
-              <div className="bg-slate-900/50 rounded-xl p-5 border border-slate-700">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <p className="text-slate-400 text-xs mb-1">Reference</p>
-                    <p className="text-white font-semibold text-sm font-mono">{reference}</p>
-                  </div>
-                  <span
-                    className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(orderStatus.status)}`}
-                  >
-                    {orderStatus.status || 'Unknown'}
-                  </span>
+            {/* Status Body */}
+            <div className="px-6 py-5">
+              {orderStatus.message && (
+                <div className="mb-4">
+                  <p className="text-slate-500 text-xs mb-1">Message</p>
+                  <p className="text-white text-sm">{orderStatus.message}</p>
                 </div>
+              )}
 
-                {orderStatus.message && (
-                  <div className="mb-4">
-                    <p className="text-slate-400 text-xs mb-1">Message</p>
-                    <p className="text-slate-200 text-sm">{orderStatus.message}</p>
-                  </div>
-                )}
-
-                {orderStatus.data && Object.keys(orderStatus.data).length > 0 && (
-                  <div className="border-t border-slate-700 pt-4 mt-4 space-y-2">
-                    {Object.entries(orderStatus.data).map(([key, value]) => (
-                      <div key={key} className="flex items-center justify-between">
-                        <span className="text-slate-400 text-xs capitalize">
-                          {key.replace(/([A-Z])/g, ' $1').trim()}
-                        </span>
-                        <span className="text-white text-sm font-medium">
-                          {String(value)}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
+              {orderStatus.data && Object.keys(orderStatus.data).length > 0 && (
+                <div className="space-y-3">
+                  {Object.entries(orderStatus.data).map(([key, value]) => (
+                    <div key={key} className="flex items-center justify-between py-2 border-b border-slate-700/40 last:border-0">
+                      <span className="text-slate-400 text-xs capitalize">
+                        {key.replace(/([A-Z])/g, ' $1').trim()}
+                      </span>
+                      <span className="text-white text-sm font-medium">
+                        {String(value)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   )

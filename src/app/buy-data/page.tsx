@@ -1,18 +1,15 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import {
-  Smartphone,
   CheckCircle,
-  Zap,
   Loader2,
   AlertCircle,
-  ChevronDown,
   Check,
   Copy,
   ExternalLink,
-  X,
 } from 'lucide-react'
 
 type NetworkReference = 'mtn' | 'telecel' | 'atishare'
@@ -23,12 +20,15 @@ interface NetworkPackage {
   label: string
   cost: number
   validity: string
+  tag?: string
 }
 
 interface NetworkData {
   code: NetworkReference
   name: string
-  dropdownLabel: string
+  description: string
+  logo: string
+  accentColor: string
   packages: NetworkPackage[]
 }
 
@@ -36,93 +36,72 @@ const networks: NetworkData[] = [
   {
     code: 'mtn',
     name: 'MTN',
-    dropdownLabel: 'MTN',
+    description: 'Fast and reliable network',
+    logo: '/mtn.jpg',
+    accentColor: 'amber',
     packages: [
-      { id: 'mtn-1', capacityInGb: 1, label: '1 GB', cost: 5, validity: '30 days' },
-      { id: 'mtn-2', capacityInGb: 2, label: '2 GB', cost: 10, validity: '30 days' },
-      { id: 'mtn-3', capacityInGb: 3, label: '3 GB', cost: 15, validity: '30 days' },
-      { id: 'mtn-4', capacityInGb: 4, label: '4 GB', cost: 20, validity: '30 days' },
-      { id: 'mtn-5', capacityInGb: 5, label: '5 GB', cost: 25, validity: '30 days' },
-      { id: 'mtn-6', capacityInGb: 6, label: '6 GB', cost: 30, validity: '30 days' },
-      { id: 'mtn-7', capacityInGb: 8, label: '8 GB', cost: 40, validity: '30 days' },
-      { id: 'mtn-8', capacityInGb: 10, label: '10 GB', cost: 47, validity: '30 days' },
-      { id: 'mtn-9', capacityInGb: 15, label: '15 GB', cost: 65, validity: '30 days' },
-      { id: 'mtn-10', capacityInGb: 20, label: '20 GB', cost: 85, validity: '30 days' },
-      { id: 'mtn-11', capacityInGb: 25, label: '25 GB', cost: 105, validity: '30 days' },
-      { id: 'mtn-12', capacityInGb: 30, label: '30 GB', cost: 130, validity: '30 days' },
-      { id: 'mtn-13', capacityInGb: 40, label: '40 GB', cost: 170, validity: '30 days' },
-      { id: 'mtn-14', capacityInGb: 50, label: '50 GB', cost: 205, validity: '30 days' },
+      { id: 'mtn-1', capacityInGb: 1, label: '1GB', cost: 5, validity: 'No Expiry' },
+      { id: 'mtn-2', capacityInGb: 2, label: '2GB', cost: 10, validity: 'No Expiry', tag: 'STANDARD' },
+      { id: 'mtn-3', capacityInGb: 3, label: '3GB', cost: 15, validity: 'No Expiry' },
+      { id: 'mtn-4', capacityInGb: 4, label: '4GB', cost: 20, validity: 'No Expiry' },
+      { id: 'mtn-5', capacityInGb: 5, label: '5GB', cost: 25, validity: 'No Expiry', tag: 'POPULAR' },
+      { id: 'mtn-6', capacityInGb: 6, label: '6GB', cost: 30, validity: 'No Expiry' },
+      { id: 'mtn-7', capacityInGb: 8, label: '8GB', cost: 40, validity: 'No Expiry' },
+      { id: 'mtn-8', capacityInGb: 10, label: '10GB', cost: 47, validity: 'No Expiry', tag: 'POWER' },
+      { id: 'mtn-9', capacityInGb: 15, label: '15GB', cost: 65, validity: 'No Expiry', tag: 'ELITE' },
+      { id: 'mtn-10', capacityInGb: 20, label: '20GB', cost: 85, validity: 'No Expiry' },
+      { id: 'mtn-11', capacityInGb: 25, label: '25GB', cost: 105, validity: 'No Expiry' },
+      { id: 'mtn-12', capacityInGb: 30, label: '30GB', cost: 130, validity: 'No Expiry' },
+      { id: 'mtn-13', capacityInGb: 40, label: '40GB', cost: 170, validity: 'No Expiry' },
+      { id: 'mtn-14', capacityInGb: 50, label: '50GB', cost: 205, validity: 'No Expiry' },
     ],
   },
   {
     code: 'telecel',
-    name: 'TELECEL',
-    dropdownLabel: 'TELECEL',
+    name: 'Telecel',
+    description: 'Quality nationwide coverage',
+    logo: '/telecel.png',
+    accentColor: 'red',
     packages: [
-      { id: 'tel-1', capacityInGb: 10, label: '10 GB', cost: 45, validity: '30 days' },
-      { id: 'tel-2', capacityInGb: 15, label: '15 GB', cost: 70, validity: '30 days' },
-      { id: 'tel-3', capacityInGb: 20, label: '20 GB', cost: 85, validity: '30 days' },
-      { id: 'tel-4', capacityInGb: 25, label: '25 GB', cost: 110, validity: '30 days' },
-      { id: 'tel-5', capacityInGb: 30, label: '30 GB', cost: 130, validity: '30 days' },
-      { id: 'tel-6', capacityInGb: 40, label: '40 GB', cost: 165, validity: '30 days' },
-      { id: 'tel-7', capacityInGb: 50, label: '50 GB', cost: 200, validity: '30 days' },
-      { id: 'tel-8', capacityInGb: 100, label: '100 GB', cost: 380, validity: '30 days' },
+      { id: 'tel-1', capacityInGb: 10, label: '10GB', cost: 45, validity: 'No Expiry' },
+      { id: 'tel-2', capacityInGb: 15, label: '15GB', cost: 70, validity: 'No Expiry' },
+      { id: 'tel-3', capacityInGb: 20, label: '20GB', cost: 85, validity: 'No Expiry', tag: 'POPULAR' },
+      { id: 'tel-4', capacityInGb: 25, label: '25GB', cost: 110, validity: 'No Expiry' },
+      { id: 'tel-5', capacityInGb: 30, label: '30GB', cost: 130, validity: 'No Expiry' },
+      { id: 'tel-6', capacityInGb: 40, label: '40GB', cost: 165, validity: 'No Expiry' },
+      { id: 'tel-7', capacityInGb: 50, label: '50GB', cost: 200, validity: 'No Expiry' },
+      { id: 'tel-8', capacityInGb: 100, label: '100GB', cost: 380, validity: 'No Expiry', tag: 'MEGA' },
     ],
   },
   {
     code: 'atishare',
-    name: 'ATISHARE',
-    dropdownLabel: 'AT PREMIUM BUNDLES',
+    name: 'AirtelTigo',
+    description: 'Affordable data solutions',
+    logo: '/at.png',
+    accentColor: 'blue',
     packages: [
-      { id: 'ats-1', capacityInGb: 1, label: '1 GB', cost: 4.90, validity: '30 days' },
-      { id: 'ats-2', capacityInGb: 2, label: '2 GB', cost: 9.90, validity: '30 days' },
-      { id: 'ats-3', capacityInGb: 3, label: '3 GB', cost: 14, validity: '30 days' },
-      { id: 'ats-4', capacityInGb: 4, label: '4 GB', cost: 19, validity: '30 days' },
-      { id: 'ats-5', capacityInGb: 5, label: '5 GB', cost: 24, validity: '30 days' },
-      { id: 'ats-6', capacityInGb: 6, label: '6 GB', cost: 28, validity: '30 days' },
-      { id: 'ats-7', capacityInGb: 7, label: '7 GB', cost: 32, validity: '30 days' },
-      { id: 'ats-8', capacityInGb: 8, label: '8 GB', cost: 35, validity: '30 days' },
-      { id: 'ats-9', capacityInGb: 10, label: '10 GB', cost: 44, validity: '30 days' },
-      { id: 'ats-10', capacityInGb: 12, label: '12 GB', cost: 52, validity: '30 days' },
-      { id: 'ats-11', capacityInGb: 15, label: '15 GB', cost: 64, validity: '30 days' },
-      { id: 'ats-12', capacityInGb: 20, label: '20 GB', cost: 83, validity: '30 days' },
-      { id: 'ats-13', capacityInGb: 25, label: '25 GB', cost: 108, validity: '30 days' },
-      { id: 'ats-14', capacityInGb: 30, label: '30 GB', cost: 130, validity: '30 days' },
+      { id: 'ats-1', capacityInGb: 1, label: '1GB', cost: 4.90, validity: 'No Expiry' },
+      { id: 'ats-2', capacityInGb: 2, label: '2GB', cost: 9.90, validity: 'No Expiry' },
+      { id: 'ats-3', capacityInGb: 3, label: '3GB', cost: 14, validity: 'No Expiry' },
+      { id: 'ats-4', capacityInGb: 4, label: '4GB', cost: 19, validity: 'No Expiry' },
+      { id: 'ats-5', capacityInGb: 5, label: '5GB', cost: 24, validity: 'No Expiry', tag: 'POPULAR' },
+      { id: 'ats-6', capacityInGb: 6, label: '6GB', cost: 28, validity: 'No Expiry' },
+      { id: 'ats-7', capacityInGb: 7, label: '7GB', cost: 32, validity: 'No Expiry' },
+      { id: 'ats-8', capacityInGb: 8, label: '8GB', cost: 35, validity: 'No Expiry' },
+      { id: 'ats-9', capacityInGb: 10, label: '10GB', cost: 44, validity: 'No Expiry' },
+      { id: 'ats-10', capacityInGb: 12, label: '12GB', cost: 52, validity: 'No Expiry' },
+      { id: 'ats-11', capacityInGb: 15, label: '15GB', cost: 64, validity: 'No Expiry' },
+      { id: 'ats-12', capacityInGb: 20, label: '20GB', cost: 83, validity: 'No Expiry' },
+      { id: 'ats-13', capacityInGb: 25, label: '25GB', cost: 108, validity: 'No Expiry' },
+      { id: 'ats-14', capacityInGb: 30, label: '30GB', cost: 130, validity: 'No Expiry' },
     ],
   },
 ]
 
-const networkStyles: Record<NetworkReference, { card: string; cardHover: string; text: string; button: string; buttonHover: string; buttonText: string; ring: string; badge: string }> = {
-  mtn: {
-    card: 'bg-amber-400',
-    cardHover: 'hover:bg-gradient-to-br hover:from-amber-400 hover:via-orange-400 hover:to-orange-500',
-    text: 'text-slate-900',
-    button: 'bg-slate-900/20',
-    buttonHover: 'hover:bg-slate-900 hover:text-white',
-    buttonText: 'text-slate-900',
-    ring: 'ring-amber-400/50',
-    badge: 'bg-amber-400 text-slate-900 border-amber-500',
-  },
-  telecel: {
-    card: 'bg-red-600',
-    cardHover: 'hover:bg-gradient-to-br hover:from-red-600 hover:via-red-500 hover:to-orange-500',
-    text: 'text-white',
-    button: 'bg-white/20',
-    buttonHover: 'hover:bg-white hover:text-slate-900',
-    buttonText: 'text-white',
-    ring: 'ring-red-500/50',
-    badge: 'bg-red-600 text-white border-red-500',
-  },
-  atishare: {
-    card: 'bg-blue-600',
-    cardHover: 'hover:bg-gradient-to-br hover:from-blue-600 hover:via-blue-500 hover:to-cyan-500',
-    text: 'text-white',
-    button: 'bg-white/20',
-    buttonHover: 'hover:bg-white hover:text-slate-900',
-    buttonText: 'text-white',
-    ring: 'ring-blue-500/50',
-    badge: 'bg-blue-600 text-white border-blue-500',
-  },
+const accentColors: Record<string, { text: string; border: string; bg: string; badge: string }> = {
+  amber: { text: 'text-amber-400', border: 'border-amber-400', bg: 'bg-amber-400', badge: 'bg-amber-400 text-slate-900' },
+  red: { text: 'text-red-400', border: 'border-red-400', bg: 'bg-red-400', badge: 'bg-red-400 text-white' },
+  blue: { text: 'text-blue-400', border: 'border-blue-400', bg: 'bg-blue-400', badge: 'bg-blue-400 text-white' },
 }
 
 function generateOrderReference() {
@@ -210,119 +189,83 @@ export default function BuyDataPage() {
     setPhoneNumber('')
   }
 
-  const [dropdownOpen, setDropdownOpen] = useState(false)
-  const dropdownRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setDropdownOpen(false)
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
-
   const selectedNetworkData = networks.find((n) => n.code === selectedNetwork)!
-  const styles = networkStyles[selectedNetwork]
-
-  const networkDotColor: Record<NetworkReference, string> = {
-    mtn: 'bg-amber-400',
-    telecel: 'bg-red-500',
-    atishare: 'bg-blue-500',
-  }
+  const colors = accentColors[selectedNetworkData.accentColor]
 
   return (
-    <div className="min-h-screen bg-slate-900 py-10">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold text-white">
-            Bundle packages
-          </h1>
-          <p className="text-slate-400 text-sm mt-1">
-            Choose your preferred network to see tailored data bundle options.
-          </p>
-        </div>
+    <div className="min-h-screen bg-slate-900 py-8 md:py-12">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6">
 
-        {/* Network Selector */}
-        <div className="bg-slate-800/50 rounded-2xl p-6 mb-8">
-          <label className="block text-xs font-bold text-slate-300 tracking-widest mb-3">
-            NETWORK
-          </label>
-          <div className="relative w-64" ref={dropdownRef}>
-            <button
-              onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="w-full flex items-center justify-between bg-slate-700 text-white text-sm font-semibold rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-amber-400 cursor-pointer hover:bg-slate-600 transition-colors"
-            >
-              <span className="flex items-center gap-2.5">
-                <span className={`h-2.5 w-2.5 rounded-full ${networkDotColor[selectedNetwork]}`} />
-                {selectedNetworkData.dropdownLabel}
-              </span>
-              <ChevronDown className={`h-4 w-4 text-slate-400 transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`} />
-            </button>
-
-            {dropdownOpen && (
-              <div className="absolute top-full left-0 mt-1.5 w-full bg-slate-700 rounded-lg border border-slate-600 shadow-xl overflow-hidden z-10">
-                {networks.map((network) => {
-                  const isActive = selectedNetwork === network.code
-                  return (
-                    <button
-                      key={network.code}
-                      onClick={() => {
-                        setSelectedNetwork(network.code)
-                        setDropdownOpen(false)
-                      }}
-                      className={`w-full flex items-center justify-between px-4 py-2.5 text-sm font-medium transition-colors ${
-                        isActive
-                          ? 'bg-slate-600 text-white'
-                          : 'text-slate-300 hover:bg-slate-600/60 hover:text-white'
-                      }`}
-                    >
-                      <span className="flex items-center gap-2.5">
-                        <span className={`h-2.5 w-2.5 rounded-full ${networkDotColor[network.code]}`} />
-                        {network.dropdownLabel}
-                      </span>
-                      {isActive && <Check className="h-4 w-4 text-amber-400" />}
-                    </button>
-                  )
-                })}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Packages Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {selectedNetworkData.packages.map((plan) => (
-            <div
-              key={plan.id}
-              className={`${styles.card} ${styles.cardHover} rounded-xl p-5 flex flex-col justify-between ring-2 ${styles.ring} transition-all duration-300 group`}
-            >
-              <div>
-                <p className={`text-xs font-bold tracking-widest ${styles.text} opacity-70 mb-3`}>
-                  {selectedNetworkData.name}
-                </p>
-
-                <div className="flex items-end justify-between mb-4">
-                  <div>
-                    <p className={`text-xs ${styles.text} opacity-60`}>Size</p>
-                    <p className={`text-2xl font-bold ${styles.text}`}>{plan.label}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className={`text-xs ${styles.text} opacity-60`}>Price</p>
-                    <p className={`text-2xl font-bold ${styles.text}`}>₵{plan.cost}</p>
-                  </div>
-                </div>
-              </div>
-
+        {/* Network Selector Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+          {networks.map((network) => {
+            const isActive = selectedNetwork === network.code
+            return (
               <button
-                onClick={() => handleGetBundle(plan)}
-                className={`w-full py-2.5 rounded-lg font-bold text-xs tracking-widest transition-all duration-200 ${styles.button} ${styles.buttonHover} ${styles.buttonText}`}
+                key={network.code}
+                onClick={() => setSelectedNetwork(network.code)}
+                className={`relative p-6 rounded-2xl border-2 transition-all duration-200 text-center cursor-pointer ${
+                  isActive
+                    ? `border-amber-400 bg-slate-800`
+                    : 'border-slate-700/60 bg-slate-800/40 hover:border-slate-600 hover:bg-slate-800/60'
+                }`}
               >
-                GET THIS BUNDLE
+                {isActive && (
+                  <div className="absolute top-3 right-3 h-5 w-5 rounded-full bg-amber-400 flex items-center justify-center">
+                    <Check className="h-3 w-3 text-slate-900" />
+                  </div>
+                )}
+                <Image
+                  src={network.logo}
+                  alt={network.name}
+                  width={48}
+                  height={48}
+                  className="h-12 w-12 rounded-full mx-auto mb-3 object-cover"
+                />
+                <p className="text-white font-bold text-sm">{network.name}</p>
+                <p className="text-slate-400 text-xs mt-1">{network.description}</p>
               </button>
-            </div>
+            )
+          })}
+        </div>
+
+        {/* Section Title */}
+        <div className="mb-6">
+          <h2 className="text-white font-bold text-lg">
+            {selectedNetworkData.name} Plans
+          </h2>
+        </div>
+
+        {/* Packages Grid - 4 columns */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {selectedNetworkData.packages.map((plan) => (
+            <button
+              key={plan.id}
+              onClick={() => handleGetBundle(plan)}
+              className="relative bg-slate-800 border border-slate-700/60 rounded-xl p-5 text-left hover:border-amber-400/60 transition-all duration-200 group cursor-pointer"
+            >
+              {plan.tag && (
+                <span className="text-slate-500 text-[10px] font-semibold tracking-wider uppercase">
+                  {plan.tag}
+                </span>
+              )}
+              {!plan.tag && (
+                <span className="text-slate-600 text-[10px] font-medium tracking-wider uppercase">
+                  {plan.label}
+                </span>
+              )}
+
+              <p className={`text-2xl font-bold mt-1 mb-2 ${colors.text}`}>
+                {plan.label}
+              </p>
+
+              <p className="text-white font-semibold text-sm">
+                GHS {plan.cost.toFixed(2)}
+              </p>
+              <p className="text-slate-500 text-xs mt-0.5">
+                {plan.validity}
+              </p>
+            </button>
           ))}
         </div>
       </div>
@@ -338,7 +281,7 @@ export default function BuyDataPage() {
                   {selectedNetworkData.name.toUpperCase()} BUNDLE
                 </h2>
                 <p className="text-white font-bold text-lg mt-1">
-                  {selectedPlan.label} — ₵{selectedPlan.cost}
+                  {selectedPlan.label} &mdash; GHS {selectedPlan.cost.toFixed(2)}
                 </p>
               </div>
               <button
@@ -352,11 +295,11 @@ export default function BuyDataPage() {
             <div className="border-t border-slate-700 my-4" />
 
             <div className="flex items-start gap-3 mb-4">
-              <div className={`h-10 w-10 rounded-full ${styles.badge} border-2 flex items-center justify-center flex-shrink-0`}>
-                <span className="text-xs font-bold">{selectedPlan.label}</span>
+              <div className={`h-10 w-10 rounded-full ${colors.badge} border-2 ${colors.border} flex items-center justify-center flex-shrink-0`}>
+                <span className="text-[10px] font-bold">{selectedPlan.label}</span>
               </div>
               <p className="text-slate-400 text-sm leading-relaxed">
-                This bundle will be applied to the number you provide below. Ensure the network matches the recipient SIM. You will be redirected to complete payment.
+                This bundle will be applied to the number you provide below. Ensure the network matches the recipient SIM.
               </p>
             </div>
 

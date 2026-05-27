@@ -5,12 +5,11 @@ import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
-import { Menu, X } from 'lucide-react'
+import { Menu, X, Search } from 'lucide-react'
 
 const navigation = [
   { name: 'Home', href: '/' },
   { name: 'Buy Data', href: '/buy-data' },
-  { name: 'Track Orders', href: '/track-orders' },
 ]
 
 export default function Navigation() {
@@ -18,31 +17,23 @@ export default function Navigation() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-slate-900/95 backdrop-blur-md border-b border-slate-800">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
+    <nav className="fixed top-0 left-0 right-0 z-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+        <div className="flex justify-between items-center h-14 bg-slate-800/90 backdrop-blur-md rounded-full px-5 border border-slate-700/60 shadow-lg shadow-black/10">
           {/* Brand */}
-          <Link href="/" className="flex items-center group">
+          <Link href="/" className="flex items-center gap-2.5">
             <Image
               src="/TechBro Logo.png"
               alt="TechBro Data Hub"
-              width={40}
-              height={40}
-              className="h-10 w-10 rounded-full object-cover ring-2 ring-amber-400"
+              width={32}
+              height={32}
+              className="h-8 w-8 rounded-full object-cover"
             />
-            <div className="ml-3">
-              <div className="font-bold text-base leading-tight">
-                <span className="text-white">TechBro</span>
-                <span className="text-amber-400"> Data Hub</span>
-              </div>
-              <p className="text-xs text-slate-400 leading-tight">
-                Fast, reliable data bundles across major networks.
-              </p>
-            </div>
+            <span className="text-white font-bold text-sm hidden sm:block">TechBro</span>
           </Link>
 
           {/* Desktop nav */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center gap-1">
             {navigation.map((item) => {
               const isActive = pathname === item.href
               return (
@@ -50,54 +41,83 @@ export default function Navigation() {
                   key={item.name}
                   href={item.href}
                   className={cn(
-                    'text-sm font-medium transition-colors',
+                    'px-4 py-2 rounded-full text-sm font-medium transition-all duration-200',
                     isActive
-                      ? 'text-amber-400'
-                      : 'text-slate-200 hover:text-white',
+                      ? 'bg-slate-700/80 text-white'
+                      : 'text-slate-300 hover:text-white hover:bg-slate-700/40',
                   )}
                 >
                   {item.name}
                 </Link>
               )
             })}
+            <Link
+              href="/track-orders"
+              className={cn(
+                'flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200',
+                pathname === '/track-orders'
+                  ? 'bg-slate-700/80 text-white'
+                  : 'text-slate-300 hover:text-white hover:bg-slate-700/40',
+              )}
+            >
+              <Search className="h-3.5 w-3.5" />
+              Track Order
+            </Link>
+          </div>
+
+          {/* CTA Button */}
+          <div className="hidden md:block">
+            <Link
+              href="/buy-data"
+              className="px-5 py-2 rounded-full bg-amber-400 text-slate-900 text-sm font-bold hover:bg-amber-300 transition-colors"
+            >
+              Get Started
+            </Link>
           </div>
 
           {/* Mobile menu button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-lg text-slate-300 hover:bg-slate-800"
+            className="md:hidden p-2 rounded-full text-slate-300 hover:bg-slate-700/60"
             aria-label="Toggle menu"
           >
-            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
         </div>
-      </div>
 
-      {/* Mobile menu */}
-      {mobileMenuOpen && (
-        <div className="md:hidden border-t border-slate-800 bg-slate-900">
-          <div className="px-4 py-3 space-y-1">
-            {navigation.map((item) => {
-              const isActive = pathname === item.href
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={cn(
-                    'block px-3 py-2 rounded-lg text-sm font-medium',
-                    isActive
-                      ? 'text-amber-400 bg-slate-800'
-                      : 'text-slate-200 hover:bg-slate-800',
-                  )}
-                >
-                  {item.name}
-                </Link>
-              )
-            })}
+        {/* Mobile menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden mt-2 bg-slate-800/95 backdrop-blur-md rounded-2xl border border-slate-700/60 shadow-xl overflow-hidden">
+            <div className="p-3 space-y-1">
+              {[...navigation, { name: 'Track Order', href: '/track-orders' }].map((item) => {
+                const isActive = pathname === item.href
+                return (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={cn(
+                      'block px-4 py-2.5 rounded-xl text-sm font-medium transition-colors',
+                      isActive
+                        ? 'text-white bg-slate-700/80'
+                        : 'text-slate-300 hover:bg-slate-700/40',
+                    )}
+                  >
+                    {item.name}
+                  </Link>
+                )
+              })}
+              <Link
+                href="/buy-data"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-4 py-2.5 rounded-xl text-sm font-bold text-center bg-amber-400 text-slate-900 mt-2"
+              >
+                Get Started
+              </Link>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </nav>
   )
 }
