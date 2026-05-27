@@ -35,7 +35,7 @@ export default function Home() {
             </p>
 
             <p className="text-lg text-slate-300 mb-12 max-w-2xl leading-relaxed">
-              Kindly be informed that Yello deliveries are running 24/7 all through the night with no breaks 🚀 📱 Keep shopping till you're tired.... Instant delivery 🍌 🍌
+              Kindly be informed that Yello deliveries are running 24/7 all through the night with no breaks 🚀 📱 Keep shopping till you&apos;re tired.... Instant delivery 🍌 🍌
             </p>
 
             <Link
