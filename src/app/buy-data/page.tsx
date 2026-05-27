@@ -92,27 +92,36 @@ const networks: NetworkData[] = [
   },
 ]
 
-const networkStyles: Record<NetworkReference, { card: string; text: string; button: string; buttonText: string; ring: string }> = {
+const networkStyles: Record<NetworkReference, { card: string; cardHover: string; text: string; button: string; buttonHover: string; buttonText: string; ring: string; badge: string }> = {
   mtn: {
     card: 'bg-amber-400',
+    cardHover: 'hover:bg-gradient-to-br hover:from-amber-400 hover:via-orange-400 hover:to-orange-500',
     text: 'text-slate-900',
-    button: 'bg-slate-900/20 hover:bg-slate-900/30',
+    button: 'bg-slate-900/20',
+    buttonHover: 'hover:bg-slate-900 hover:text-white',
     buttonText: 'text-slate-900',
     ring: 'ring-amber-400/50',
+    badge: 'bg-amber-400 text-slate-900 border-amber-500',
   },
   telecel: {
     card: 'bg-red-600',
+    cardHover: 'hover:bg-gradient-to-br hover:from-red-600 hover:via-red-500 hover:to-orange-500',
     text: 'text-white',
-    button: 'bg-white/20 hover:bg-white/30',
+    button: 'bg-white/20',
+    buttonHover: 'hover:bg-white hover:text-slate-900',
     buttonText: 'text-white',
     ring: 'ring-red-500/50',
+    badge: 'bg-red-600 text-white border-red-500',
   },
   atishare: {
     card: 'bg-blue-600',
+    cardHover: 'hover:bg-gradient-to-br hover:from-blue-600 hover:via-blue-500 hover:to-cyan-500',
     text: 'text-white',
-    button: 'bg-white/20 hover:bg-white/30',
+    button: 'bg-white/20',
+    buttonHover: 'hover:bg-white hover:text-slate-900',
     buttonText: 'text-white',
     ring: 'ring-blue-500/50',
+    badge: 'bg-blue-600 text-white border-blue-500',
   },
 }
 
@@ -288,7 +297,7 @@ export default function BuyDataPage() {
           {selectedNetworkData.packages.map((plan) => (
             <div
               key={plan.id}
-              className={`${styles.card} rounded-xl p-5 flex flex-col justify-between ring-2 ${styles.ring}`}
+              className={`${styles.card} ${styles.cardHover} rounded-xl p-5 flex flex-col justify-between ring-2 ${styles.ring} transition-all duration-300 group`}
             >
               <div>
                 <p className={`text-xs font-bold tracking-widest ${styles.text} opacity-70 mb-3`}>
@@ -309,7 +318,7 @@ export default function BuyDataPage() {
 
               <button
                 onClick={() => handleGetBundle(plan)}
-                className={`w-full py-2.5 rounded-lg font-bold text-xs tracking-widest transition-all duration-200 ${styles.button} ${styles.buttonText}`}
+                className={`w-full py-2.5 rounded-lg font-bold text-xs tracking-widest transition-all duration-200 ${styles.button} ${styles.buttonHover} ${styles.buttonText}`}
               >
                 GET THIS BUNDLE
               </button>
@@ -323,54 +332,64 @@ export default function BuyDataPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={closeModal} />
           <div className="relative bg-slate-800 rounded-2xl p-6 md:p-8 w-full max-w-md border border-slate-700 shadow-2xl">
-            <button
-              onClick={closeModal}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors"
-            >
-              <X className="h-5 w-5" />
-            </button>
+            <div className="flex items-start justify-between mb-1">
+              <div>
+                <h2 className="text-xs font-bold text-slate-300 tracking-widest">
+                  {selectedNetworkData.name.toUpperCase()} BUNDLE
+                </h2>
+                <p className="text-white font-bold text-lg mt-1">
+                  {selectedPlan.label} — ₵{selectedPlan.cost}
+                </p>
+              </div>
+              <button
+                onClick={closeModal}
+                className="text-slate-400 hover:text-white text-xs font-bold tracking-wider border border-slate-600 rounded-md px-3 py-1.5 hover:border-slate-500 transition-colors"
+              >
+                CLOSE
+              </button>
+            </div>
 
-            <h2 className="text-xl font-bold text-white mb-1">Complete Purchase</h2>
-            <p className="text-slate-400 text-sm mb-6">
-              {selectedNetworkData.name} — {selectedPlan.label} for ₵{selectedPlan.cost}
-            </p>
+            <div className="border-t border-slate-700 my-5" />
+
+            <div className="flex items-start gap-3 mb-6">
+              <div className={`h-10 w-10 rounded-full ${styles.badge} border-2 flex items-center justify-center flex-shrink-0`}>
+                <span className="text-xs font-bold">{selectedPlan.label}</span>
+              </div>
+              <p className="text-slate-400 text-sm leading-relaxed">
+                This bundle will be applied to the number you provide below. Ensure the network matches the recipient SIM. You will be redirected to complete payment.
+              </p>
+            </div>
 
             <div className="mb-6">
               <label htmlFor="phone" className="block text-xs font-bold text-slate-300 mb-2 tracking-widest">
-                RECIPIENT PHONE NUMBER
+                RECIPIENT NUMBER
               </label>
-              <div className="relative">
-                <Smartphone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
-                <input
-                  type="tel"
-                  id="phone"
-                  value={phoneNumber}
-                  onChange={(e) => {
-                    setPhoneNumber(e.target.value)
-                    setErrorMessage('')
-                    setPurchaseStatus('idle')
-                  }}
-                  placeholder="0551234567"
-                  className="w-full pl-10 pr-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:border-amber-400 transition-colors"
-                />
-              </div>
+              <input
+                type="tel"
+                id="phone"
+                value={phoneNumber}
+                onChange={(e) => {
+                  setPhoneNumber(e.target.value)
+                  setErrorMessage('')
+                  setPurchaseStatus('idle')
+                }}
+                placeholder="e.g. 024 123 4567"
+                className="w-full px-4 py-3 bg-slate-900/50 border-2 border-amber-400 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:border-amber-500 transition-colors"
+              />
             </div>
 
             <button
               onClick={handlePurchase}
               disabled={isLoading || !phoneNumber}
-              className="w-full bg-amber-400 text-slate-900 py-3 rounded-lg font-bold text-sm hover:bg-amber-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all duration-200"
+              className="w-full bg-amber-400 text-slate-900 py-3.5 rounded-lg font-bold text-sm tracking-wider hover:bg-amber-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all duration-200"
             >
               {isLoading ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Processing...
+                  PROCESSING...
                 </>
               ) : (
-                <>
-                  <Zap className="h-4 w-4" />
-                  Buy Now — ₵{selectedPlan.cost}
-                </>
+                'CONTINUE TO PAYMENT'
               )}
             </button>
 
