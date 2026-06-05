@@ -95,7 +95,7 @@ export default function AdminPendingOrdersPage() {
           <p className="text-sm uppercase tracking-[0.3em] text-amber-400">Pending Orders</p>
           <h1 className="mt-3 text-3xl font-semibold text-white">Awaiting wallet top-up</h1>
           <p className="mt-2 max-w-2xl text-sm text-slate-400">
-            Orders that couldn't process due to insufficient API wallet balance. Top up your wallet, then click "Process" to complete each order.
+            Orders that couldn&apos;t process due to insufficient API wallet balance. Top up your wallet, then click &quot;Process&quot; to complete each order.
           </p>
         </div>
         <Link
@@ -223,7 +223,7 @@ export default function AdminPendingOrdersPage() {
           </li>
           <li className="flex gap-3">
             <span className="font-bold text-amber-400">3.</span>
-            <span>Return here and click the "Process" button to complete the customer's purchase.</span>
+            <span>Return here and click the &quot;Process&quot; button to complete the customer&apos;s purchase.</span>
           </li>
           <li className="flex gap-3">
             <span className="font-bold text-amber-400">4.</span>

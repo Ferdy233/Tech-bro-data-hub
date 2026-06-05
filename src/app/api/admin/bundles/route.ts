@@ -8,7 +8,7 @@ async function readBundles() {
   try {
     const raw = await fs.readFile(bundlesPath, 'utf-8')
     return JSON.parse(raw)
-  } catch (e) {
+  } catch {
     return {}
   }
 }

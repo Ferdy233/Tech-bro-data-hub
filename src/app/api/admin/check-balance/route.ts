@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { Resend } from 'resend'
 
 const GHINSTANTGIGS_BASE_URL = process.env.GHINSTANTGIGS_BASE_URL
@@ -7,7 +7,7 @@ const RESEND_API_KEY = process.env.RESEND_API_KEY
 const ALERT_EMAIL = process.env.ALERT_EMAIL_RECIPIENT
 const LOW_BALANCE_THRESHOLD = parseFloat(process.env.LOW_BALANCE_THRESHOLD || '500')
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // Fetch current balance from GhInstantGigs
     const balanceResponse = await fetch(

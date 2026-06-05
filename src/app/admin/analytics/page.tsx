@@ -12,8 +12,23 @@ interface BalanceCheckResult {
   alertSent: boolean
 }
 
+interface BalancesData {
+  gigstore?: {
+    ok: boolean
+    balance?: string | null
+    error?: string
+  }
+  paystack?: {
+    ok: boolean
+    data?: {
+      data?: Array<{ balance: number }>
+    }
+    error?: string
+  }
+}
+
 export default function AdminAnalyticsPage() {
-  const [balances, setBalances] = useState<any | null>(null)
+  const [balances, setBalances] = useState<BalancesData | null>(null)
   const [balanceCheckResult, setBalanceCheckResult] = useState<BalanceCheckResult | null>(null)
   const [isChecking, setIsChecking] = useState(false)
   const [lastChecked, setLastChecked] = useState<Date | null>(null)
@@ -153,7 +168,7 @@ export default function AdminAnalyticsPage() {
           </li>
           <li className="flex items-start gap-3">
             <span className="mt-1 inline-flex h-2 w-2 rounded-full bg-sky-400 flex-shrink-0" />
-            <span><strong className="text-white">Manual Verification:</strong> Use the "Check Balance" button above to manually verify your wallet at any time.</span>
+            <span><strong className="text-white">Manual Verification:</strong> Use the &quot;Check Balance&quot; button above to manually verify your wallet at any time.</span>
           </li>
           <li className="flex items-start gap-3">
             <span className="mt-1 inline-flex h-2 w-2 rounded-full bg-lime-400 flex-shrink-0" />

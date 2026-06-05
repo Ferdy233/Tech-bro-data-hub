@@ -9,7 +9,20 @@ const RESEND_API_KEY = process.env.RESEND_API_KEY
 const ALERT_EMAIL = process.env.ALERT_EMAIL_RECIPIENT
 const PENDING_ORDERS_FILE = join(process.cwd(), 'data', 'pending-orders.json')
 
-async function getPendingOrders() {
+interface PendingOrder {
+  id: string
+  networkReference: string
+  orderReference: string
+  recipientPhone: string
+  capacityInGb: number
+  paystackReference: string
+  requiredBalance: number
+  currentBalance: number
+  createdAt: string
+  customerEmail?: string
+}
+
+async function getPendingOrders(): Promise<PendingOrder[]> {
   try {
     const data = await readFile(PENDING_ORDERS_FILE, 'utf-8')
     return JSON.parse(data)
@@ -18,7 +31,7 @@ async function getPendingOrders() {
   }
 }
 
-async function savePendingOrder(order: any) {
+async function savePendingOrder(order: PendingOrder) {
   try {
     const orders = await getPendingOrders()
     orders.push(order)

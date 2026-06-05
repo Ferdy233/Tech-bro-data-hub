@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { BarChart3, Package, AlertCircle, Settings, Zap, Clock, CheckCircle } from 'lucide-react'
+import { BarChart3, Package, AlertCircle, Zap, Clock, CheckCircle } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 interface DashboardMetrics {

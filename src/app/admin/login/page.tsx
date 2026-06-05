@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Lock, ShieldCheck, ArrowRight } from 'lucide-react'
+import { ShieldCheck, ArrowRight } from 'lucide-react'
 
 export default function AdminLoginPage() {
   const router = useRouter()

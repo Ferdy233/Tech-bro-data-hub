@@ -61,7 +61,7 @@ async function processPurchase(order: PendingOrder) {
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   // Check admin authentication
   const adminAuth = request.cookies.get('admin-auth')?.value
@@ -70,7 +70,7 @@ export async function POST(
   }
 
   try {
-    const { id } = params
+    const { id } = await params
     const orders = await getPendingOrders()
     const orderIndex = orders.findIndex((o) => o.id === id)
 
@@ -119,7 +119,7 @@ export async function POST(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   // Check admin authentication
   const adminAuth = request.cookies.get('admin-auth')?.value
@@ -128,7 +128,7 @@ export async function DELETE(
   }
 
   try {
-    const { id } = params
+    const { id } = await params
     const orders = await getPendingOrders()
     const filteredOrders = orders.filter((o) => o.id !== id)
 
