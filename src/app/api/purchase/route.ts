@@ -8,11 +8,36 @@ interface PurchaseBody {
   orderReference: string
   recipientPhone: string
   capacityInGb: number
+  paystackReference: string
 }
 
 function isValidPhone(phone: string) {
   const cleaned = phone.replace(/\s+/g, '')
   return /^(0[2-9]\d{8}|233[2-9]\d{8})$/.test(cleaned)
+}
+
+async function verifyPaystackPayment(reference: string): Promise<{ verified: boolean; error?: string }> {
+  const secretKey = process.env.PAYSTACK_SECRET_KEY
+  if (!secretKey) {
+    return { verified: false, error: 'Payment service not configured.' }
+  }
+
+  try {
+    const response = await fetch(
+      `https://api.paystack.co/transaction/verify/${reference}`,
+      { headers: { Authorization: `Bearer ${secretKey}` } },
+    )
+
+    const result = await response.json()
+
+    if (!response.ok || !result.status || result.data?.status !== 'success') {
+      return { verified: false, error: result.message || 'Payment not confirmed.' }
+    }
+
+    return { verified: true }
+  } catch {
+    return { verified: false, error: 'Could not verify payment with Paystack.' }
+  }
 }
 
 export async function POST(req: NextRequest) {
@@ -36,7 +61,15 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  const { networkReference, orderReference, recipientPhone, capacityInGb } = body
+  const { networkReference, orderReference, recipientPhone, capacityInGb, paystackReference } = body
+
+  // Validate paystackReference
+  if (!paystackReference || typeof paystackReference !== 'string') {
+    return NextResponse.json(
+      { success: false, error: 'Missing payment reference. Please complete payment first.' },
+      { status: 400 },
+    )
+  }
 
   if (
     !networkReference ||
@@ -66,6 +99,51 @@ export async function POST(req: NextRequest) {
     )
   }
 
+  // Step 1: Verify payment with Paystack
+  const { verified, error: paymentError } = await verifyPaystackPayment(paystackReference)
+  if (!verified) {
+    return NextResponse.json(
+      { success: false, error: paymentError || 'Payment verification failed. Data will not be processed.' },
+      { status: 402 },
+    )
+  }
+
+  // Step 1.5: Check API wallet balance before processing
+  try {
+    const balanceCheckResponse = await fetch(`${req.nextUrl.origin}/api/check-purchase-balance`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        bundleId: orderReference,
+        bundleAmount: capacityInGb * 10,
+        networkReference,
+        orderReference,
+        recipientPhone,
+        capacityInGb,
+        paystackReference,
+        customerEmail: '',
+      }),
+    })
+
+    const balanceData = await balanceCheckResponse.json()
+
+    if (!balanceData.canProceed) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Order is being processed.',
+          paymentVerified: true,
+          orderId: orderReference,
+        },
+        { status: 402 },
+      )
+    }
+  } catch (error) {
+    console.error('Balance check failed:', error)
+    // Don't block the transaction if balance check fails - just log it
+  }
+
+  // Step 2: Payment confirmed — now deliver the data bundle
   try {
     const upstream = await fetch(`${baseUrl}/v1/purchaseBundle`, {
       method: 'POST',
@@ -90,7 +168,7 @@ export async function POST(req: NextRequest) {
       const message =
         (payload && typeof payload === 'object' && 'message' in payload
           ? String((payload as { message: unknown }).message)
-          : null) ?? 'Upstream purchase failed.'
+          : null) ?? 'Data delivery failed after payment. Please contact support.'
       return NextResponse.json(
         { success: false, error: message },
         { status: upstream.status },
@@ -104,7 +182,7 @@ export async function POST(req: NextRequest) {
     })
   } catch {
     return NextResponse.json(
-      { success: false, error: 'Could not reach the data provider.' },
+      { success: false, error: 'Could not reach the data provider. Payment was successful — please contact support.' },
       { status: 502 },
     )
   }

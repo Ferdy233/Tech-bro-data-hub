@@ -10,6 +10,7 @@ import { Menu, X, Search } from 'lucide-react'
 const navigation = [
   { name: 'Home', href: '/' },
   { name: 'Buy Data', href: '/buy-data' },
+  { name: 'Admin', href: '/admin' },
 ]
 
 export default function Navigation() {

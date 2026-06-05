@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import {
@@ -11,6 +11,23 @@ import {
   Copy,
   ExternalLink,
 } from 'lucide-react'
+
+declare global {
+  interface Window {
+    PaystackPop: {
+      setup: (options: {
+        key: string
+        email: string
+        amount: number
+        currency?: string
+        ref?: string
+        metadata?: Record<string, unknown>
+        onClose: () => void
+        callback: (response: { reference: string }) => void
+      }) => { openIframe: () => void }
+    }
+  }
+}
 
 type NetworkReference = 'mtn' | 'telecel' | 'atishare'
 
@@ -32,7 +49,7 @@ interface NetworkData {
   packages: NetworkPackage[]
 }
 
-const networks: NetworkData[] = [
+const defaultNetworks: NetworkData[] = [
   {
     code: 'mtn',
     name: 'MTN',
@@ -98,6 +115,8 @@ const networks: NetworkData[] = [
   },
 ]
 
+// networks at runtime may be updated from server-stored prices
+
 const accentColors: Record<string, { text: string; border: string; bg: string; badge: string }> = {
   amber: { text: 'text-amber-400', border: 'border-amber-400', bg: 'bg-amber-400', badge: 'bg-amber-400 text-slate-900' },
   red: { text: 'text-red-400', border: 'border-red-400', bg: 'bg-red-400', badge: 'bg-red-400 text-white' },
@@ -111,19 +130,57 @@ function generateOrderReference() {
 }
 
 export default function BuyDataPage() {
-  const [selectedNetwork, setSelectedNetwork] = useState<NetworkReference>(networks[0].code)
+  const [networks, setNetworks] = useState<NetworkData[]>(defaultNetworks)
+  const [selectedNetwork, setSelectedNetwork] = useState<NetworkReference>(defaultNetworks[0].code)
   const [selectedPlan, setSelectedPlan] = useState<NetworkPackage | null>(null)
   const [showPurchaseModal, setShowPurchaseModal] = useState(false)
   const [phoneNumber, setPhoneNumber] = useState('')
+  const [email, setEmail] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [purchaseStatus, setPurchaseStatus] = useState<'idle' | 'success' | 'error'>('idle')
   const [errorMessage, setErrorMessage] = useState('')
   const [lastOrderRef, setLastOrderRef] = useState('')
   const [copied, setCopied] = useState(false)
 
+  // Load Paystack inline script
+  useEffect(() => {
+    if (document.getElementById('paystack-script')) return
+    const script = document.createElement('script')
+    script.id = 'paystack-script'
+    script.src = 'https://js.paystack.co/v1/inline.js'
+    script.async = true
+    document.head.appendChild(script)
+  }, [])
+
+  // Load persisted bundle prices from server (admin-managed)
+  useEffect(() => {
+    let mounted = true
+    fetch('/api/admin/bundles')
+      .then((r) => r.json())
+      .then((data) => {
+        if (!mounted) return
+        if (data?.bundles) {
+          const map = data.bundles
+          const updated = defaultNetworks.map((n) => ({
+            ...n,
+            packages: n.packages.map((p) => ({ ...p, cost: map[p.id] ?? p.cost })),
+          }))
+          setNetworks(updated)
+        }
+      })
+      .catch(() => {})
+    return () => {
+      mounted = false
+    }
+  }, [])
+
   const validatePhoneNumber = (phone: string) => {
     const cleanPhone = phone.replace(/\s+/g, '')
     return /^(0[2-9]\d{8}|233[2-9]\d{8})$/.test(cleanPhone)
+  }
+
+  const validateEmail = (emailStr: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailStr)
   }
 
   const handleGetBundle = (plan: NetworkPackage) => {
@@ -146,39 +203,86 @@ export default function BuyDataPage() {
       return
     }
 
-    setIsLoading(true)
-    setPurchaseStatus('idle')
-    setErrorMessage('')
-
-    try {
-      const ref = generateOrderReference()
-      const response = await fetch('/api/purchase', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          networkReference: selectedNetwork,
-          orderReference: ref,
-          recipientPhone: phoneNumber.replace(/\s+/g, ''),
-          capacityInGb: selectedPlan.capacityInGb,
-        }),
-      })
-
-      const data = await response.json().catch(() => null)
-
-      if (response.ok && data?.success) {
-        setPurchaseStatus('success')
-        setLastOrderRef(data.orderReference || ref)
-        setPhoneNumber('')
-      } else {
-        setErrorMessage(data?.error || 'Purchase failed. Please try again.')
-        setPurchaseStatus('error')
-      }
-    } catch {
-      setErrorMessage('Network error. Please check your connection and try again.')
+    if (!email || !validateEmail(email)) {
+      setErrorMessage('Please enter a valid email address')
       setPurchaseStatus('error')
-    } finally {
-      setIsLoading(false)
+      return
     }
+
+    const paystackKey = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY
+    if (!paystackKey) {
+      setErrorMessage('Payment service is not configured.')
+      setPurchaseStatus('error')
+      return
+    }
+
+    if (!window.PaystackPop) {
+      setErrorMessage('Payment system is loading. Please try again.')
+      setPurchaseStatus('error')
+      return
+    }
+
+    setErrorMessage('')
+    setPurchaseStatus('idle')
+
+    const orderRef = generateOrderReference()
+    const amountInKobo = Math.round(selectedPlan.cost * 100)
+
+    const handler = window.PaystackPop.setup({
+      key: paystackKey,
+      email: email,
+      amount: amountInKobo,
+      currency: 'GHS',
+      ref: orderRef,
+      metadata: {
+        networkReference: selectedNetwork,
+        recipientPhone: phoneNumber.replace(/\s+/g, ''),
+        capacityInGb: selectedPlan.capacityInGb,
+        planLabel: selectedPlan.label,
+      },
+      onClose: () => {
+        // User closed payment popup
+      },
+      callback: (response: { reference: string }) => {
+        // Payment successful on Paystack — now verify and deliver bundle
+        setIsLoading(true)
+        setPurchaseStatus('idle')
+        setErrorMessage('')
+
+        fetch('/api/purchase', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            networkReference: selectedNetwork,
+            orderReference: orderRef,
+            recipientPhone: phoneNumber.replace(/\s+/g, ''),
+            capacityInGb: selectedPlan.capacityInGb,
+            paystackReference: response.reference,
+          }),
+        })
+          .then((result) => result.json().catch(() => null).then((data) => ({ ok: result.ok, data })))
+          .then(({ ok, data }) => {
+            if (ok && data?.success) {
+              setPurchaseStatus('success')
+              setLastOrderRef(data.orderReference || orderRef)
+              setPhoneNumber('')
+              setEmail('')
+            } else {
+              setErrorMessage(data?.error || 'Purchase failed after payment. Please contact support.')
+              setPurchaseStatus('error')
+            }
+          })
+          .catch(() => {
+            setErrorMessage('Network error after payment. Please contact support with your reference: ' + response.reference)
+            setPurchaseStatus('error')
+          })
+          .finally(() => {
+            setIsLoading(false)
+          })
+      },
+    })
+
+    handler.openIframe()
   }
 
   const closeModal = () => {
@@ -187,6 +291,7 @@ export default function BuyDataPage() {
     setPurchaseStatus('idle')
     setErrorMessage('')
     setPhoneNumber('')
+    setEmail('')
   }
 
   const selectedNetworkData = networks.find((n) => n.code === selectedNetwork)!
@@ -303,7 +408,7 @@ export default function BuyDataPage() {
               </p>
             </div>
 
-            <div className="mb-4">
+            <div className="mb-3">
               <label htmlFor="phone" className="block text-xs font-bold text-slate-300 mb-2 tracking-widest">
                 RECIPIENT NUMBER
               </label>
@@ -317,13 +422,31 @@ export default function BuyDataPage() {
                   setPurchaseStatus('idle')
                 }}
                 placeholder="e.g. 024 123 4567"
-                className="w-full px-4 py-2.5 bg-slate-900/50 border-2 border-amber-400 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:border-amber-500 transition-colors"
+                className="w-full px-4 py-2.5 bg-slate-900/50 border-2 border-slate-600 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:border-amber-400 transition-colors"
+              />
+            </div>
+
+            <div className="mb-4">
+              <label htmlFor="email" className="block text-xs font-bold text-slate-300 mb-2 tracking-widest">
+                EMAIL ADDRESS
+              </label>
+              <input
+                type="email"
+                id="email"
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value)
+                  setErrorMessage('')
+                  setPurchaseStatus('idle')
+                }}
+                placeholder="e.g. you@example.com"
+                className="w-full px-4 py-2.5 bg-slate-900/50 border-2 border-slate-600 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:border-amber-400 transition-colors"
               />
             </div>
 
             <button
               onClick={handlePurchase}
-              disabled={isLoading || !phoneNumber}
+              disabled={isLoading || !phoneNumber || !email}
               className="w-full bg-amber-400 text-slate-900 py-3 rounded-lg font-bold text-sm tracking-wider hover:bg-amber-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all duration-200"
             >
               {isLoading ? (
