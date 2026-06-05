@@ -257,6 +257,7 @@ export default function BuyDataPage() {
             orderReference: orderRef,
             recipientPhone: phoneNumber.replace(/\s+/g, ''),
             capacityInGb: selectedPlan.capacityInGb,
+            bundleId: selectedPlan.id,
             paystackReference: response.reference,
           }),
         })

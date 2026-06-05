@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { readFile, writeFile } from 'fs/promises'
 import { join } from 'path'
 import { sendAdminAlertEmail } from '@/lib/email'
+import { getBundlePrice } from '@/lib/bundles'
 
 const GHINSTANTGIGS_BASE_URL = process.env.GHINSTANTGIGS_BASE_URL
 const GHINSTANTGIGS_API_KEY = process.env.GHINSTANTGIGS_API_KEY
@@ -41,11 +42,21 @@ async function savePendingOrder(order: PendingOrder) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { bundleAmount, bundleId, networkReference, orderReference, recipientPhone, capacityInGb, paystackReference, customerEmail } = await request.json()
+    const { bundleAmount: requestedAmount, bundleId, networkReference, orderReference, recipientPhone, capacityInGb, paystackReference, customerEmail } = await request.json()
 
-    if (!bundleAmount || !bundleId) {
+    if (!bundleId) {
       return NextResponse.json(
         { error: 'Missing required fields' },
+        { status: 400 }
+      )
+    }
+
+    const catalogPrice = await getBundlePrice(bundleId)
+    const bundleAmount = catalogPrice ?? requestedAmount
+
+    if (typeof bundleAmount !== 'number' || bundleAmount <= 0) {
+      return NextResponse.json(
+        { error: 'Invalid bundle amount' },
         { status: 400 }
       )
     }

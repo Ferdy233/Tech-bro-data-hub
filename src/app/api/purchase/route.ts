@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getBundlePrice } from '@/lib/bundles'
 
 const ALLOWED_NETWORKS = ['mtn', 'telecel', 'atishare', 'atbigtime'] as const
 type NetworkRef = (typeof ALLOWED_NETWORKS)[number]
@@ -9,6 +10,7 @@ interface PurchaseBody {
   recipientPhone: string
   capacityInGb: number
   paystackReference: string
+  bundleId: string
 }
 
 function isValidPhone(phone: string) {
@@ -61,7 +63,7 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  const { networkReference, orderReference, recipientPhone, capacityInGb, paystackReference } = body
+  const { networkReference, orderReference, recipientPhone, capacityInGb, paystackReference, bundleId } = body
 
   // Validate paystackReference
   if (!paystackReference || typeof paystackReference !== 'string') {
@@ -98,6 +100,20 @@ export async function POST(req: NextRequest) {
       { status: 400 },
     )
   }
+  if (!bundleId || typeof bundleId !== 'string') {
+    return NextResponse.json(
+      { success: false, error: 'Missing bundleId.' },
+      { status: 400 },
+    )
+  }
+
+  const bundleAmount = await getBundlePrice(bundleId)
+  if (bundleAmount === null) {
+    return NextResponse.json(
+      { success: false, error: 'Unknown bundle. Please refresh and try again.' },
+      { status: 400 },
+    )
+  }
 
   // Step 1: Verify payment with Paystack
   const { verified, error: paymentError } = await verifyPaystackPayment(paystackReference)
@@ -114,8 +130,8 @@ export async function POST(req: NextRequest) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        bundleId: orderReference,
-        bundleAmount: capacityInGb * 10,
+        bundleId,
+        bundleAmount,
         networkReference,
         orderReference,
         recipientPhone,
