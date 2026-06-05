@@ -1,21 +1,5 @@
 import { NextResponse } from 'next/server'
-import fs from 'fs/promises'
-import path from 'path'
-
-const bundlesPath = path.join(process.cwd(), 'data', 'bundles.json')
-
-async function readBundles() {
-  try {
-    const raw = await fs.readFile(bundlesPath, 'utf-8')
-    return JSON.parse(raw)
-  } catch {
-    return {}
-  }
-}
-
-async function writeBundles(data: Record<string, number>) {
-  await fs.writeFile(bundlesPath, JSON.stringify(data, null, 2), 'utf-8')
-}
+import { readBundles, writeBundles } from '@/lib/bundles'
 
 function isAdmin(request: Request) {
   const cookie = request.headers.get('cookie') || ''

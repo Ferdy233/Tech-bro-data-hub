@@ -10,8 +10,10 @@
   },
   "dependencies": {
     "@headlessui/react": "^2.2.9",
+    "@vercel/blob": "^2.4.0",
     "clsx": "^2.1.1",
     "lucide-react": "^0.544.0",
+    "mongodb": "^7.2.0",
     "next": "^15.5.18",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",

@@ -1,44 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { readFile, writeFile } from 'fs/promises'
-import { join } from 'path'
 import { sendAdminAlertEmail } from '@/lib/email'
 import { getBundlePrice } from '@/lib/bundles'
+import { addPendingOrder } from '@/lib/pending-orders'
 
 const GHINSTANTGIGS_BASE_URL = process.env.GHINSTANTGIGS_BASE_URL
 const GHINSTANTGIGS_API_KEY = process.env.GHINSTANTGIGS_API_KEY
-const PENDING_ORDERS_FILE = join(process.cwd(), 'data', 'pending-orders.json')
-
-interface PendingOrder {
-  id: string
-  networkReference: string
-  orderReference: string
-  recipientPhone: string
-  capacityInGb: number
-  paystackReference: string
-  requiredBalance: number
-  currentBalance: number
-  createdAt: string
-  customerEmail?: string
-}
-
-async function getPendingOrders(): Promise<PendingOrder[]> {
-  try {
-    const data = await readFile(PENDING_ORDERS_FILE, 'utf-8')
-    return JSON.parse(data)
-  } catch {
-    return []
-  }
-}
-
-async function savePendingOrder(order: PendingOrder) {
-  try {
-    const orders = await getPendingOrders()
-    orders.push(order)
-    await writeFile(PENDING_ORDERS_FILE, JSON.stringify(orders, null, 2))
-  } catch (error) {
-    console.error('Error saving pending order:', error)
-  }
-}
 
 export async function POST(request: NextRequest) {
   try {
@@ -87,8 +53,7 @@ export async function POST(request: NextRequest) {
 
     if (!hasSufficientBalance) {
       // Save as pending order
-      const pendingOrder = {
-        id: `pending-${Date.now()}`,
+      await addPendingOrder({
         networkReference,
         orderReference,
         recipientPhone,
@@ -96,11 +61,8 @@ export async function POST(request: NextRequest) {
         paystackReference,
         requiredBalance: bundleAmount,
         currentBalance,
-        createdAt: new Date().toISOString(),
         customerEmail,
-      }
-
-      await savePendingOrder(pendingOrder)
+      })
 
       // Send alert email to admin
       const emailResult = await sendAdminAlertEmail({
