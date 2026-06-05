@@ -155,7 +155,7 @@ export default function BuyDataPage() {
   // Load persisted bundle prices from server (admin-managed)
   useEffect(() => {
     let mounted = true
-    fetch('/api/admin/bundles')
+    fetch('/api/bundles')
       .then((r) => r.json())
       .then((data) => {
         if (!mounted) return

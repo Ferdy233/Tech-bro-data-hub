@@ -2,9 +2,27 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
+import { useEffect, useState } from 'react'
 import { ArrowRight, Search } from 'lucide-react'
+import { formatCurrency } from '@/lib/utils'
+
+const SHOWCASE_BUNDLE_ID = 'mtn-10'
+const SHOWCASE_DEFAULT_PRICE = 85
 
 export default function Home() {
+  const [showcasePrice, setShowcasePrice] = useState(SHOWCASE_DEFAULT_PRICE)
+
+  useEffect(() => {
+    fetch('/api/bundles')
+      .then((r) => r.json())
+      .then((data) => {
+        const price = data?.bundles?.[SHOWCASE_BUNDLE_ID]
+        if (typeof price === 'number') {
+          setShowcasePrice(price)
+        }
+      })
+      .catch(() => {})
+  }, [])
   return (
     <div className="min-h-screen bg-slate-900 relative overflow-hidden">
       {/* Background glow */}
@@ -67,7 +85,7 @@ export default function Home() {
                 <div className="flex items-end justify-between">
                   <div>
                     <p className="text-slate-500 text-xs">Price</p>
-                    <p className="text-white font-bold text-lg">\u20b583</p>
+                    <p className="text-white font-bold text-lg">{formatCurrency(showcasePrice)}</p>
                   </div>
                   <div className="text-right">
                     <p className="text-slate-500 text-xs">Validity</p>
