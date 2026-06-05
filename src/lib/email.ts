@@ -6,19 +6,13 @@ export async function sendAdminAlertEmail(options: {
 }): Promise<{ sent: boolean; error?: string }> {
   const apiKey = process.env.RESEND_API_KEY
   const to = process.env.ALERT_EMAIL_RECIPIENT
-  const from = process.env.RESEND_FROM_EMAIL
+  const from =
+    process.env.RESEND_FROM_EMAIL ?? 'TechBro Data Hub <noreply@techbrodatahub.com>'
 
   if (!apiKey || !to) {
     return {
       sent: false,
       error: 'Email alerts are not configured. Set RESEND_API_KEY and ALERT_EMAIL_RECIPIENT.',
-    }
-  }
-
-  if (!from) {
-    return {
-      sent: false,
-      error: 'RESEND_FROM_EMAIL is not set. Use a verified sender address from your Resend dashboard.',
     }
   }
 
