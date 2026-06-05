@@ -1,10 +1,8 @@
 import { NextResponse } from 'next/server'
-import { Resend } from 'resend'
+import { sendAdminAlertEmail } from '@/lib/email'
 
 const GHINSTANTGIGS_BASE_URL = process.env.GHINSTANTGIGS_BASE_URL
 const GHINSTANTGIGS_API_KEY = process.env.GHINSTANTGIGS_API_KEY
-const RESEND_API_KEY = process.env.RESEND_API_KEY
-const ALERT_EMAIL = process.env.ALERT_EMAIL_RECIPIENT
 const LOW_BALANCE_THRESHOLD = parseFloat(process.env.LOW_BALANCE_THRESHOLD || '500')
 
 export async function GET() {
@@ -32,14 +30,12 @@ export async function GET() {
     // Check if balance is low
     const isLow = currentBalance < LOW_BALANCE_THRESHOLD
 
-    if (isLow && RESEND_API_KEY && ALERT_EMAIL) {
-      // Send alert email
-      const resend = new Resend(RESEND_API_KEY)
+    let alertSent = false
+    let alertError: string | undefined
 
-      await resend.emails.send({
-        from: 'noreply@techbro.com',
-        to: ALERT_EMAIL,
-        subject: '⚠️ Low API Wallet Balance Alert',
+    if (isLow) {
+      const emailResult = await sendAdminAlertEmail({
+        subject: 'Low API Wallet Balance Alert',
         html: `
           <div style="font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px;">
             <div style="background: white; padding: 30px; border-radius: 8px; max-width: 600px; margin: 0 auto;">
@@ -73,13 +69,16 @@ export async function GET() {
           </div>
         `,
       })
+      alertSent = emailResult.sent
+      alertError = emailResult.error
     }
 
     return NextResponse.json({
       balance: currentBalance,
       isLow,
       threshold: LOW_BALANCE_THRESHOLD,
-      alertSent: isLow && !!RESEND_API_KEY && !!ALERT_EMAIL,
+      alertSent,
+      alertError,
     })
   } catch (error) {
     console.error('Balance check error:', error)

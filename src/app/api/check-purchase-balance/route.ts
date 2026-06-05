@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { Resend } from 'resend'
 import { readFile, writeFile } from 'fs/promises'
 import { join } from 'path'
+import { sendAdminAlertEmail } from '@/lib/email'
 
 const GHINSTANTGIGS_BASE_URL = process.env.GHINSTANTGIGS_BASE_URL
 const GHINSTANTGIGS_API_KEY = process.env.GHINSTANTGIGS_API_KEY
-const RESEND_API_KEY = process.env.RESEND_API_KEY
-const ALERT_EMAIL = process.env.ALERT_EMAIL_RECIPIENT
 const PENDING_ORDERS_FILE = join(process.cwd(), 'data', 'pending-orders.json')
 
 interface PendingOrder {
@@ -94,13 +92,8 @@ export async function POST(request: NextRequest) {
       await savePendingOrder(pendingOrder)
 
       // Send alert email to admin
-      if (RESEND_API_KEY && ALERT_EMAIL) {
-        const resend = new Resend(RESEND_API_KEY)
-
-        await resend.emails.send({
-          from: 'noreply@techbro.com',
-          to: ALERT_EMAIL,
-          subject: '🚨 Insufficient Balance - Customer Order Pending',
+      const emailResult = await sendAdminAlertEmail({
+          subject: 'Insufficient Balance - Customer Order Pending',
           html: `
             <div style="font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px;">
               <div style="background: white; padding: 30px; border-radius: 8px; max-width: 600px; margin: 0 auto;">
@@ -151,6 +144,9 @@ export async function POST(request: NextRequest) {
             </div>
           `,
         })
+
+      if (!emailResult.sent) {
+        console.error('Pending order alert email failed:', emailResult.error)
       }
     }
 

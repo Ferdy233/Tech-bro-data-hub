@@ -10,6 +10,7 @@ interface BalanceCheckResult {
   isLow: boolean
   threshold: number
   alertSent: boolean
+  alertError?: string
 }
 
 interface BalancesData {
@@ -125,7 +126,7 @@ export default function AdminAnalyticsPage() {
               </h3>
               <p className={`mt-2 text-sm ${balanceCheckResult.isLow ? 'text-red-300' : 'text-emerald-300'}`}>
                 {balanceCheckResult.isLow
-                  ? `Your API wallet is below ₵${balanceCheckResult.threshold}. Top up from your Paystack balance to continue serving customers. ${balanceCheckResult.alertSent ? 'Alert email sent.' : ''}`
+                  ? `Your API wallet is below ₵${balanceCheckResult.threshold}. Top up from your Paystack balance to continue serving customers.${balanceCheckResult.alertSent ? ' Alert email sent.' : balanceCheckResult.alertError ? ` Email alert failed: ${balanceCheckResult.alertError}` : ''}`
                   : `Your API wallet balance is sufficient (₵${balanceCheckResult.balance.toFixed(2)}). Threshold: ₵${balanceCheckResult.threshold}.`}
               </p>
               {lastChecked && (
